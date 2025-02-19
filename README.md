@@ -1,4 +1,3 @@
-```markdown
 # Password Manager with Biometric Authentication (Frontend)
 
 This is the frontend part of the **Password Manager with Biometric Authentication** project built with **Next.js** and **React**. The app utilizes OTP (One-Time Password) authentication and biometric verification (face and fingerprint) to securely manage user passwords.
