@@ -1,108 +1,152 @@
-# Password Manager with Biometric Authentication (Frontend)
 
-This is the frontend part of the **Password Manager with Biometric Authentication** project built with **Next.js** and **React**. The app utilizes OTP (One-Time Password) authentication and biometric verification (face and fingerprint) to securely manage user passwords.
+---
+
+# Password Manager with Biometric Authentication
+
+A password manager application that ensures secure login through **biometric authentication** (Face ID) and **OTP verification** (Google Authenticator). This application allows users to manage and securely store passwords for various services.
 
 ## Features
 
-- OTP-based authentication for verifying users.
-- Face verification (using facial recognition) for added security.
-- Password access only allowed if OTP and biometric verifications are both successful.
-- Context-based state management for handling authentication status.
+- **Biometric Authentication**: Supports Face ID or fingerprint authentication.
+- **OTP Verification**: Uses One-Time Password (OTP) for secure authentication.
+- **Login & Signup**: Users can log in or sign up with email and password.
+- **Password Management**: Users can securely store and view their passwords in an encrypted format.
 
-## Technologies Used
+---
 
-- **Next.js**: React framework for building the app.
-- **React**: For UI components and state management.
-- **React-Hot-Toast**: For showing success/error toasts.
-- **Tailwind CSS**: For styling.
-- **TypeScript**: For type safety.
+## Getting Started
 
-## Folder Structure
+Follow these steps to get the project up and running on your local machine.
 
-```bash
-.
-├── components
-│   ├── Auth
-│   │   ├── FaceAuth.tsx      # Facial recognition authentication component
-│   │   ├── OTPAuth.tsx       # OTP verification component
-│   │   └── PasswordViewer.tsx # Password viewer (requires OTP and face authentication)
-├── context
-│   └── AuthContext.tsx       # Context for authentication state management
-├── pages
-│   └── index.tsx             # Main page for displaying components
-└── styles
-    └── globals.css           # Global CSS styles
-```
+### Prerequisites
 
-## Setup
+Make sure you have the following installed:
 
-### 1. Clone the repository
+- [Node.js](https://nodejs.org/) (v16 or higher)
+- [Yarn](https://classic.yarnpkg.com/en/docs/install/) or [npm](https://www.npmjs.com/)
+- [Next.js](https://nextjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
 
-```bash
-git clone https://github.com/your-username/password-manager-biometric-auth.git
-cd password-manager-biometric-auth
-```
+### Installation
 
-### 2. Install Dependencies
+1. **Clone the repository**:
 
-Make sure you have **Node.js** and **npm** installed. Then run:
+   ```bash
+   git clone <repository_url>
+   cd password-manager-biometric-auth
+   ```
 
-```bash
-npm install
-```
+2. **Install dependencies**:
 
-### 3. Run the Development Server
+   Using Yarn:
 
-To run the app locally, execute:
+   ```bash
+   yarn install
+   ```
 
-```bash
-npm run dev
-```
+   Using npm:
 
-Visit [http://localhost:3000](http://localhost:3000) in your browser.
+   ```bash
+   npm install
+   ```
 
-### 4. Customizing OTP
+3. **Run the project**:
 
-Currently, the OTP is set to `123456` in the frontend. You can customize this logic in `OTPAuth.tsx` to fit your own OTP validation method.
+   Using Yarn:
 
-### 5. Styling
+   ```bash
+   yarn dev
+   ```
 
-Tailwind CSS is used for styling the components. If you need to make changes to the styles, you can modify the respective classes in the component files, or add new ones in `globals.css`.
+   Using npm:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
+
+---
+
+## File Structure
+
+Here’s an overview of the main project files:
+
+- **`/app`**: Contains the main application pages (auth, dashboard, etc.)
+- **`/context`**: Includes the `AuthContext` to manage authentication state.
+- **`/styles`**: Contains the global CSS and Tailwind styling.
+- **`/components`**: Reusable components for input fields, buttons, etc.
+
+---
+
+## Pages
+
+### Home Page
+
+- **Route**: `/`
+- **Description**: The landing page that greets the user with the application title and a button to navigate to the login/signup page.
+
+### Login & Sign Up
+
+- **Route**: `/auth`
+- **Description**: A page where users can log in with their email and password, or sign up for a new account. 
+
+  - **Login Page**: Validates the user credentials (`test@example.com`, `password123`).
+  - **Sign Up Page**: Prompts the user to enter their details (name, email, password).
+
+### Dashboard
+
+- **Route**: `/dashboard`
+- **Description**: The user dashboard that allows them to view saved passwords after successful login. Requires Face ID and OTP verification.
+
+---
 
 ## Authentication Flow
 
-1. **OTP Verification**: 
-   - The user is prompted to enter an OTP.
-   - If the OTP is correct (`123456`), the user is verified, and access is granted.
-   - Incorrect OTPs show an error message.
+1. **Login**: 
+   - The user enters their email and password to authenticate.
+   - On successful login, the user is redirected to the dashboard.
 
-2. **Biometric Authentication**:
-   - Face and fingerprint verification are handled by respective components (not fully implemented in the frontend, but placeholders for integration).
-   - After both OTP and biometric verifications are successful, access to the password is granted.
+2. **Signup**: 
+   - The user provides additional details like name, phone number, email, and password to create an account.
+   
+3. **Biometric Authentication**: 
+   - The user is prompted for Face ID or fingerprint verification to access their dashboard.
 
-3. **Password Viewer**:
-   - Once both verifications are passed, the password is shown on the page.
-   - If OTP or biometric verification fails, an "Access Denied" message is displayed.
+4. **OTP Verification**:
+   - After biometric verification, the user needs to enter the OTP received on their device.
 
-## Running Tests
+---
 
-This project uses Jest and React Testing Library for unit and component tests. You can run the tests with:
+## Additional Notes
 
-```bash
-npm run test
-```
+- **Toast Notifications**: For feedback on login success/failure and OTP validation, the application uses `react-hot-toast`.
+- **State Management**: Authentication state is managed globally using React Context API.
+
+---
+
+## Technologies Used
+
+- **React**: JavaScript library for building the user interface.
+- **Next.js**: React framework for server-side rendering.
+- **Tailwind CSS**: Utility-first CSS framework for styling.
+- **React Hot Toast**: For displaying toast notifications.
+- **React Context API**: For managing authentication state globally.
+
+---
 
 ## Contributing
 
-Feel free to fork this repository and submit pull requests for improvements. If you encounter any issues or have suggestions for improvements, open an issue.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m 'Add your feature'`)
+4. Push to the branch (`git push origin feature/your-feature`)
+5. Create a new Pull Request
+
+---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is open-source and available under the MIT License.
 
-## Acknowledgments
-
-- **Next.js** for the React framework.
-- **Tailwind CSS** for utility-first styling.
-- **React-Hot-Toast** for displaying toast messages.
-```
+---
