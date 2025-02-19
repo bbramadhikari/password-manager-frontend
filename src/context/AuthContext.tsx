@@ -1,21 +1,18 @@
-"use client"; // ✅ Ensure this is also marked as a client component
+"use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
 
-// Define types for the context
 interface AuthContextType {
   isFaceVerified: boolean;
   setIsFaceVerified: (verified: boolean) => void;
   isOTPVerified: boolean;
   setIsOTPVerified: (verified: boolean) => void;
   isAuthenticated: boolean;
-  setIsAuthenticated: (authenticated: boolean) => void;
+  setIsAuthenticated: (authenticated: boolean) => void; // Add this line
 }
 
-// Create the AuthContext with a default value of undefined
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// The AuthProvider component to wrap around the app
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isFaceVerified, setIsFaceVerified] = useState(false);
   const [isOTPVerified, setIsOTPVerified] = useState(false);
@@ -29,7 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isOTPVerified,
         setIsOTPVerified,
         isAuthenticated,
-        setIsAuthenticated,
+        setIsAuthenticated, // Add this line
       }}
     >
       {children}
@@ -37,13 +34,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Custom hook to use the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
-
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-
   return context;
 };

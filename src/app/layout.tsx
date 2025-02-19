@@ -1,13 +1,21 @@
-// app/layout.tsx
-import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import { ReactNode } from "react";
-export default function RootLayout({ children }: { children: ReactNode }) {
+import "../styles/globals.css";
+import { Toaster } from "react-hot-toast"; // Import Toaster
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <AuthProvider>
-      <html lang="en">
-        <body className="bg-gray-900 text-white">{children}</body>
-      </html>
-    </AuthProvider>
+    <html lang="en">
+      <body className="bg-slate-600 text-white">
+        <AuthProvider>
+          {children}
+          {/* Add Toaster component here for global toast notifications */}
+          <Toaster position="top-right" reverseOrder={false} />
+        </AuthProvider>
+      </body>
+    </html>
   );
 }
