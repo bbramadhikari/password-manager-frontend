@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+```markdown
+# Password Manager with Biometric Authentication (Frontend)
 
-## Getting Started
+This is the frontend part of the **Password Manager with Biometric Authentication** project built with **Next.js** and **React**. The app utilizes OTP (One-Time Password) authentication and biometric verification (face and fingerprint) to securely manage user passwords.
 
-First, run the development server:
+## Features
+
+- OTP-based authentication for verifying users.
+- Face verification (using facial recognition) for added security.
+- Password access only allowed if OTP and biometric verifications are both successful.
+- Context-based state management for handling authentication status.
+
+## Technologies Used
+
+- **Next.js**: React framework for building the app.
+- **React**: For UI components and state management.
+- **React-Hot-Toast**: For showing success/error toasts.
+- **Tailwind CSS**: For styling.
+- **TypeScript**: For type safety.
+
+## Folder Structure
+
+```bash
+.
+├── components
+│   ├── Auth
+│   │   ├── FaceAuth.tsx      # Facial recognition authentication component
+│   │   ├── OTPAuth.tsx       # OTP verification component
+│   │   └── PasswordViewer.tsx # Password viewer (requires OTP and face authentication)
+├── context
+│   └── AuthContext.tsx       # Context for authentication state management
+├── pages
+│   └── index.tsx             # Main page for displaying components
+└── styles
+    └── globals.css           # Global CSS styles
+```
+
+## Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/password-manager-biometric-auth.git
+cd password-manager-biometric-auth
+```
+
+### 2. Install Dependencies
+
+Make sure you have **Node.js** and **npm** installed. Then run:
+
+```bash
+npm install
+```
+
+### 3. Run the Development Server
+
+To run the app locally, execute:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Customizing OTP
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Currently, the OTP is set to `123456` in the frontend. You can customize this logic in `OTPAuth.tsx` to fit your own OTP validation method.
 
-## Learn More
+### 5. Styling
 
-To learn more about Next.js, take a look at the following resources:
+Tailwind CSS is used for styling the components. If you need to make changes to the styles, you can modify the respective classes in the component files, or add new ones in `globals.css`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Authentication Flow
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **OTP Verification**: 
+   - The user is prompted to enter an OTP.
+   - If the OTP is correct (`123456`), the user is verified, and access is granted.
+   - Incorrect OTPs show an error message.
 
-## Deploy on Vercel
+2. **Biometric Authentication**:
+   - Face and fingerprint verification are handled by respective components (not fully implemented in the frontend, but placeholders for integration).
+   - After both OTP and biometric verifications are successful, access to the password is granted.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. **Password Viewer**:
+   - Once both verifications are passed, the password is shown on the page.
+   - If OTP or biometric verification fails, an "Access Denied" message is displayed.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Running Tests
+
+This project uses Jest and React Testing Library for unit and component tests. You can run the tests with:
+
+```bash
+npm run test
+```
+
+## Contributing
+
+Feel free to fork this repository and submit pull requests for improvements. If you encounter any issues or have suggestions for improvements, open an issue.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- **Next.js** for the React framework.
+- **Tailwind CSS** for utility-first styling.
+- **React-Hot-Toast** for displaying toast messages.
+```
