@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -16,6 +17,9 @@ export default function ShowPasswordPage() {
   const [otp, setOtp] = useState("");
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [isVerified, setIsVerified] = useState(false);
+
+  const router = useRouter();
+  const { setIsAuthenticated } = useAuth();
 
   // Simulated password data (replace with real data from backend)
   const storedPasswords: PasswordEntry[] = [
@@ -52,8 +56,20 @@ export default function ShowPasswordPage() {
     }
   };
 
+  const handleSignOut = () => {
+    setIsAuthenticated(false); // Clear the authenticated state
+    toast.success("Successfully logged out!"); // Show success message
+    router.push("/"); // Redirect to the Home Page
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-slate-600 text-white">
+      <button
+        onClick={handleSignOut}
+        className="absolute top-6 right-6 px-4 py-2 bg-red-600 text-white rounded-lg"
+      >
+        Sign Out
+      </button>
       <h2 className="text-2xl font-bold">Show Passwords</h2>
 
       {/* Face ID Button */}
