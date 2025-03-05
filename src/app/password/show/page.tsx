@@ -1,5 +1,4 @@
 "use client";
-
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
@@ -17,7 +16,6 @@ export default function ShowPasswordPage() {
   const [otp, setOtp] = useState("");
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [isVerified, setIsVerified] = useState(false);
-
   const router = useRouter();
   const { setIsAuthenticated } = useAuth();
 
@@ -31,12 +29,10 @@ export default function ShowPasswordPage() {
   // Simulate Face ID Verification
   const handleFaceID = () => {
     setIsCameraOpen(true);
-
     setTimeout(() => {
       setIsFaceVerified(true);
       setIsCameraOpen(false);
       toast.success("Face ID Verified ✅");
-
       setOtpSent(true);
       toast.success("OTP Sent to your email 📩");
     }, 3000);
@@ -47,7 +43,6 @@ export default function ShowPasswordPage() {
     if (otp === "123456") {
       setIsOTPVerified(true);
       toast.success("OTP Verified ✅");
-
       // Show stored passwords after full verification
       setPasswords(storedPasswords);
       setIsVerified(true);
@@ -63,68 +58,85 @@ export default function ShowPasswordPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-slate-600 text-white">
-      <button
-        onClick={handleSignOut}
-        className="absolute top-6 right-6 px-4 py-2 bg-red-600 text-white rounded-lg"
-      >
-        Sign Out
-      </button>
-      <h2 className="text-2xl font-bold">Show Passwords</h2>
-
-      {/* Face ID Button */}
-      {!isVerified && (
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      {/* Header Section */}
+      <div className="absolute top-6 right-6">
         <button
-          className="mt-4 px-6 py-2 bg-blue-600 rounded-lg"
-          onClick={handleFaceID}
+          onClick={handleSignOut}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
         >
-          Verify Face ID
+          Sign Out
         </button>
-      )}
+      </div>
 
-      {/* Simulated Camera View */}
-      {isCameraOpen && <p className="mt-4">📷 Scanning Face...</p>}
+      {/* Main Content */}
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md space-y-6">
+        <h2 className="text-3xl font-bold text-center">Show Passwords</h2>
 
-      {/* OTP Input (Shown after Face ID is Verified) */}
-      {otpSent && !isVerified && (
-        <div className="mt-4 flex flex-col items-center">
-          <input
-            type="text"
-            placeholder="Enter OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            className="p-2 border border-gray-300 rounded text-black"
-          />
-          <button
-            className="mt-2 px-6 py-2 bg-green-600 rounded-lg"
-            onClick={handleOTPSubmit}
-          >
-            Submit OTP
-          </button>
-        </div>
-      )}
+        {/* Face ID Verification */}
+        {!isVerified && (
+          <div className="space-y-4">
+            {/* Face ID Button */}
+            <button
+              className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+              onClick={handleFaceID}
+              disabled={isCameraOpen}
+            >
+              {isCameraOpen ? "Verifying Face ID..." : "Verify Face ID"}
+            </button>
 
-      {/* Show Table with Passwords (Only if Face ID & OTP Verified) */}
-      {isVerified && (
-        <div className="mt-6 w-3/4">
-          <table className="w-full bg-gray-800 text-white rounded-lg overflow-hidden">
-            <thead>
-              <tr className="bg-gray-900">
-                <th className="py-2 px-4 text-left">Domain</th>
-                <th className="py-2 px-4 text-left">Password</th>
-              </tr>
-            </thead>
-            <tbody>
-              {passwords.map((entry, index) => (
-                <tr key={index} className="border-t border-gray-700">
-                  <td className="py-2 px-4">{entry.domain}</td>
-                  <td className="py-2 px-4">{entry.password}</td>
+            {/* Loading Animation */}
+            {isCameraOpen && (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-4 h-4 bg-green-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-4 h-4 bg-red-500 rounded-full animate-bounce [animation-delay:-0.6s]"></div>
+              </div>
+            )}
+
+            {/* OTP Input (Shown after Face ID is Verified) */}
+            {otpSent && !isOTPVerified && (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+                />
+                <button
+                  className="w-full px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
+                  onClick={handleOTPSubmit}
+                >
+                  Submit OTP
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Show Table with Passwords (Only if Face ID & OTP Verified) */}
+        {isVerified && (
+          <div className="mt-6">
+            <table className="w-full bg-gray-800 text-white rounded-lg overflow-hidden">
+              <thead>
+                <tr className="bg-gray-900">
+                  <th className="py-2 px-4 text-left">Domain</th>
+                  <th className="py-2 px-4 text-left">Password</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {passwords.map((entry, index) => (
+                  <tr key={index} className="border-t border-gray-700">
+                    <td className="py-2 px-4">{entry.domain}</td>
+                    <td className="py-2 px-4">{entry.password}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -5,26 +5,25 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 export default function AddPasswordPage() {
-  const [site, setSite] = useState("");
+  const [siteName, setSiteName] = useState("");
+  const [siteLink, setSiteLink] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  // const handleSave = () => {
-  //   if (!site || !password) {
-  //     toast.error("Both fields are required!");
-  //     return;
-  //   }
-  //   toast.success("Password saved!");
-  // };
-
+  // Handle Add Password
   const handleAdd = () => {
-    if (!password) {
-      alert("Please enter your password.");
+    if (!siteName) {
+      alert("Please enter the website name.");
       return;
     }
 
-    if (!site) {
-      alert("Please enter the domain name.");
+    if (!siteLink) {
+      alert("Please enter the website link.");
+      return;
+    }
+
+    if (!password) {
+      alert("Please enter your password.");
       return;
     }
 
@@ -33,30 +32,46 @@ export default function AddPasswordPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-slate-600 text-white">
-      <h2 className="text-2xl font-bold">Add Password</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      {/* Main Content */}
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md space-y-6">
+        <h2 className="text-3xl font-bold text-center">Add Password</h2>
 
-      <input
-        type="text"
-        placeholder="Website Link"
-        className="mt-4 p-2 border rounded w-80 text-black"
-        value={site}
-        onChange={(e) => setSite(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        className="mt-4 p-2 border rounded w-80 text-black"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        {/* Website Name Input */}
+        <input
+          type="text"
+          placeholder="Website Name"
+          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+          value={siteName}
+          onChange={(e) => setSiteName(e.target.value)}
+        />
 
-      <button
-        className="mt-4 px-6 py-2 bg-blue-600 rounded-lg"
-        onClick={handleAdd}
-      >
-        Save Password
-      </button>
+        {/* Website Link Input */}
+        <input
+          type="text"
+          placeholder="Website Link (e.g., https://example.com)"
+          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+          value={siteLink}
+          onChange={(e) => setSiteLink(e.target.value)}
+        />
+
+        {/* Password Input */}
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        {/* Save Password Button */}
+        <button
+          className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+          onClick={handleAdd}
+        >
+          Save Password
+        </button>
+      </div>
     </div>
   );
 }

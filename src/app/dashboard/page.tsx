@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 
 export default function DashboardPage() {
   const router = useRouter();
-
   const { setIsAuthenticated } = useAuth();
 
   // Handle Sign Out
@@ -17,29 +16,39 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-slate-600 text-white">
-      <button
-        onClick={handleSignOut}
-        className="absolute top-6 right-6 px-4 py-2 bg-red-600 text-white rounded-lg"
-      >
-        Sign Out
-      </button>
-
-      <h1 className="text-3xl font-bold">Dashboard</h1>
-
-      <div className="mt-6 space-x-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
+      {/* Header Section */}
+      <div className="absolute top-6 right-6">
         <button
-          className="px-6 py-2 bg-blue-600 rounded-lg"
-          onClick={() => router.push("/password/add")}
+          onClick={handleSignOut}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
         >
-          Add Password
+          Sign Out
         </button>
-        <button
-          className="px-6 py-2 bg-green-600 rounded-lg"
-          onClick={() => router.push("/password/show")}
-        >
-          Show Password
-        </button>
+      </div>
+
+      {/* Main Content */}
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md space-y-6">
+        <h1 className="text-3xl font-bold text-center">Dashboard</h1>
+
+        {/* Buttons */}
+        <div className="space-y-4">
+          {/* Add Password Button */}
+          <button
+            className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+            onClick={() => router.push("/password/add")}
+          >
+            Add Password
+          </button>
+
+          {/* Show Password Button */}
+          <button
+            className="w-full px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
+            onClick={() => router.push("/password/show")}
+          >
+            Show Password
+          </button>
+        </div>
       </div>
     </div>
   );

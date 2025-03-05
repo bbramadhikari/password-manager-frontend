@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
@@ -44,7 +43,6 @@ export default function SignupPage() {
       const context = canvasRef.current.getContext("2d");
       canvasRef.current.width = videoRef.current.videoWidth;
       canvasRef.current.height = videoRef.current.videoHeight;
-
       if (context) {
         context.drawImage(
           videoRef.current,
@@ -57,7 +55,6 @@ export default function SignupPage() {
         setImageData(imageDataUrl); // Store image data
         setFaceCaptured(true);
         setIsCameraOpen(false);
-
         // Stop the camera
         const stream = videoRef.current.srcObject as MediaStream;
         const tracks = stream.getTracks();
@@ -72,28 +69,24 @@ export default function SignupPage() {
       alert("Name must be at least 8 characters long.");
       return;
     }
-
     if (!isValidEmail(email)) {
       alert("Please enter a valid email address.");
       return;
     }
-
     if (password.length < 8) {
       alert("Password must be at least 8 characters long.");
       return;
     }
-
     if (!phone) {
       alert("Please enter your phone number.");
       return;
     }
-
     if (!faceCaptured) {
       alert("Please scan your face before signing up.");
       return;
     }
 
-    // Store Data (You can send it to the backend later)
+    // Simulate sending data to the backend
     console.log({
       name,
       phone,
@@ -107,97 +100,108 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-slate-600 text-white">
-      <h2 className="text-2xl font-bold">Sign Up</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md space-y-6">
+        <h2 className="text-3xl font-bold text-center">Sign Up</h2>
 
-      <input
-        type="text"
-        placeholder="Name (min 8 characters)"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="mt-4 p-2 border rounded w-80 text-black"
-        required
-      />
-      <input
-        type="tel"
-        placeholder="Phone Number"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        className="mt-4 p-2 border rounded w-80 text-black"
-        required
-      />
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="mt-4 p-2 border rounded w-80 text-black"
-        required
-      />
-      <input
-        type="password"
-        placeholder="Password (min 8 characters)"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="mt-4 p-2 border rounded w-80 text-black"
-        required
-      />
+        {/* Name Input */}
+        <input
+          type="text"
+          placeholder="Full Name (min 8 characters)"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+          required
+        />
 
-      {/* Face Scan Section */}
-      {!faceCaptured && (
-        <button
-          className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg"
-          onClick={startCamera}
-        >
-          Scan Face
-        </button>
-      )}
+        {/* Phone Input */}
+        <input
+          type="tel"
+          placeholder="Phone Number"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+          required
+        />
 
-      {/* Camera Preview */}
-      {isCameraOpen && (
-        <div className="mt-4">
-          <video
-            ref={videoRef}
-            autoPlay
-            className="w-80 h-60 border border-gray-300"
-          />
+        {/* Email Input */}
+        <input
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+          required
+        />
+
+        {/* Password Input */}
+        <input
+          type="password"
+          placeholder="Password (min 8 characters)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+          required
+        />
+
+        {/* Face Scan Section */}
+        {!faceCaptured && (
           <button
-            className="mt-2 px-6 py-2 bg-red-600 text-white rounded-lg"
-            onClick={captureImage}
+            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-300"
+            onClick={startCamera}
           >
-            Capture Image
+            Scan Face
           </button>
-        </div>
-      )}
+        )}
 
-      {/* Display Captured Image */}
-      {faceCaptured && imageData && (
-        <div className="mt-4">
-          <p>Face Captured:</p>
-          <img
-            src={imageData}
-            alt="Captured Face"
-            className="w-32 h-32 border rounded-lg"
-          />
-        </div>
-      )}
+        {/* Camera Preview */}
+        {isCameraOpen && (
+          <div className="space-y-2">
+            <video
+              ref={videoRef}
+              autoPlay
+              className="w-full h-60 border border-gray-600 rounded-lg"
+            />
+            <button
+              className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition duration-300"
+              onClick={captureImage}
+            >
+              Capture Image
+            </button>
+          </div>
+        )}
 
-      <button
-        className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg"
-        onClick={handleSignup}
-      >
-        Sign Up
-      </button>
+        {/* Display Captured Image */}
+        {faceCaptured && imageData && (
+          <div className="space-y-2">
+            <p className="text-center text-gray-400">Face Captured:</p>
+            <img
+              src={imageData}
+              alt="Captured Face"
+              className="w-32 h-32 mx-auto border border-gray-600 rounded-lg"
+            />
+          </div>
+        )}
 
-      <p
-        className="mt-4 text-sm cursor-pointer"
-        onClick={() => router.push("./login")}
-      >
-        Already have an account? Login
-      </p>
+        {/* Sign Up Button */}
+        <button
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+          onClick={handleSignup}
+        >
+          Sign Up
+        </button>
 
-      {/* Hidden Canvas for Capturing Image */}
-      <canvas ref={canvasRef} className="hidden" />
+        {/* Login Link */}
+        <p
+          className="text-center text-sm text-gray-400 cursor-pointer hover:text-blue-500 transition duration-300"
+          onClick={() => router.push("./login")}
+        >
+          Already have an account? Login
+        </p>
+
+        {/* Hidden Canvas for Capturing Image */}
+        <canvas ref={canvasRef} className="hidden" />
+      </div>
     </div>
   );
 }
