@@ -1,6 +1,8 @@
 "use client";
-import { useState, useRef } from "react";
+
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import * as faceapi from "face-api.js";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -10,80 +12,173 @@ export default function SignupPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [faceCaptured, setFaceCaptured] = useState(false);
+  const [faceDetected, setFaceDetected] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [modelsLoaded, setModelsLoaded] = useState(false);
+  const [faceCaptured, setFaceCaptured] = useState(false);
 
-  // Camera states
+  // Camera references
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
 
-  // Validation function
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
+  // ✅ Load Face Detection Models Before Using
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        console.log("⏳ Loading face detection models...");
+        await faceapi.nets.tinyFaceDetector.loadFromUri("/models"); // Ensure this path is correct!
+        setModelsLoaded(true);
+        console.log("✅ Face detection model loaded!");
+      } catch (error) {
+        console.error("⚠️ Error loading face detection model:", error);
+      }
+    };
+    loadModels();
+  }, []);
 
-  // Open Camera
+  // ✅ Start Camera
   const startCamera = async () => {
+    if (!modelsLoaded) {
+      alert("Face detection model is still loading. Please wait...");
+      return;
+    }
+
     setIsCameraOpen(true);
+    setFaceDetected(false);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
+      detectFace(); // Start detecting face as soon as camera starts
     } catch (error) {
       alert("Failed to access the camera.");
     }
   };
 
-  // Capture Image
-  const captureImage = () => {
-    if (videoRef.current && canvasRef.current) {
-      const context = canvasRef.current.getContext("2d");
-      canvasRef.current.width = 300; // Resize for performance
-      canvasRef.current.height = 300;
-      if (context) {
-        context.drawImage(videoRef.current, 0, 0, 300, 300);
-        const imageDataUrl = canvasRef.current.toDataURL("image/png", 0.8); // Compress
-        setImageData(imageDataUrl);
-        setFaceCaptured(true);
-        setIsCameraOpen(false);
+  // ✅ Detect Face in Real-Time with Bounding Box
 
-        // Stop the camera
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach((track) => track.stop());
+  const detectFace = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+
+    // ✅ Ensure video is loaded
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      console.warn("⏳ Waiting for video to load...");
+      return;
+    }
+
+    const detections = await faceapi.detectSingleFace(
+      video,
+      new faceapi.TinyFaceDetectorOptions()
+    );
+
+    if (detections) {
+      setFaceDetected(true);
+      console.log("✅ Face detected!");
+
+      // ✅ Draw bounding box around face
+      if (context) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        const { x, y, width, height } = detections.box;
+        context.strokeStyle = "blue";
+        context.lineWidth = 2;
+        context.strokeRect(x, y, width, height);
+
+        // ✅ Add label "Face Confirmed"
+        context.fillStyle = "blue";
+        context.fillRect(x, y - 20, width, 20);
+        context.fillStyle = "white";
+        context.font = "14px Arial";
+        context.fillText("Face Confirmed", x + 5, y - 5);
       }
+    } else {
+      setFaceDetected(false);
     }
   };
 
-  // Handle Signup API Call
+  const captureImage = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    // Stop running detection before capturing
+    setFaceDetected(false);
+
+    const video = videoRef.current;
+    const context = canvasRef.current.getContext("2d");
+
+    if (!context) return;
+
+    // ✅ Detect face before capturing
+    const detections = await faceapi.detectSingleFace(
+      video,
+      new faceapi.TinyFaceDetectorOptions()
+    );
+
+    if (!detections) {
+      alert("No face detected! Try again.");
+      return;
+    }
+
+    console.log("✅ Face detected! Attempting to capture...");
+
+    const { x, y, width, height } = detections.box; // Face bounding box
+
+    // ✅ Crop only the detected face
+    const faceCanvas = document.createElement("canvas");
+    faceCanvas.width = width;
+    faceCanvas.height = height;
+    const faceCtx = faceCanvas.getContext("2d");
+
+    if (faceCtx) {
+      faceCtx.drawImage(
+        video,
+        x,
+        y,
+        width,
+        height, // Source (bounding box)
+        0,
+        0,
+        width,
+        height // Destination (cropped face)
+      );
+
+      const faceImageDataUrl = faceCanvas.toDataURL("image/png", 0.8);
+      setImageData(faceImageDataUrl);
+      setFaceCaptured(true);
+
+      console.log("✅ Image Captured!");
+
+      // ✅ Stop the camera **after** capturing
+      setIsCameraOpen(false);
+      const stream = video.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+    }
+  };
+
+  // ✅ Keep face detection running while camera is open
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isCameraOpen) {
+      interval = setInterval(detectFace, 500);
+    }
+    return () => clearInterval(interval);
+  }, [isCameraOpen]);
+
+  // ✅ Handle Signup API Call
   const handleSignup = async () => {
-    if (name.length < 8) {
-      alert("Name must be at least 8 characters long.");
-      return;
-    }
-    if (!isValidEmail(email)) {
-      alert("Please enter a valid email address.");
-      return;
-    }
-    if (password.length < 8) {
-      alert("Password must be at least 8 characters long.");
-      return;
-    }
-    if (!phone) {
-      alert("Please enter your phone number.");
-      return;
-    }
-    if (!faceCaptured || !imageData) {
-      alert("Please scan your face before signing up.");
+    if (!name || !phone || !email || !password || !imageData) {
+      alert("All fields are required, including face scan!");
       return;
     }
 
     console.log("📤 Sending Signup Data:", {
-      username: name,
-      phone: phone,
-      email: email,
+      username: name.trim(),
+      phone: phone.trim(),
+      email: email.trim().toLowerCase(),
       password: password,
       face_image: imageData,
     });
@@ -93,11 +188,11 @@ export default function SignupPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: name,
-          phone: phone,
-          email: email,
+          username: name.trim(),
+          phone: phone.trim(),
+          email: email.trim().toLowerCase(),
           password: password,
-          face_image: imageData, // Sending Base64 image
+          face_image: imageData,
         }),
       });
 
@@ -106,13 +201,9 @@ export default function SignupPage() {
 
       if (response.ok) {
         alert("✅ Signup successful! Redirecting to login...");
-        console.log("✅ Redirecting to /login...");
-
-        setTimeout(() => {
-          router.push("./login"); // ✅ Navigate to login after 2 seconds
-        }, 2000);
+        setTimeout(() => router.push("./login"), 2000);
       } else {
-        alert(`❌ Signup failed: ${data.error || "Try again."}`);
+        alert(`❌ Signup failed: ${JSON.stringify(data)}`);
       }
     } catch (error) {
       console.error("⚠️ API Error:", error);
@@ -166,36 +257,39 @@ export default function SignupPage() {
         />
 
         {/* Face Scan Section */}
-        {!faceCaptured && (
+        {!faceDetected && (
           <button
             className="w-full bg-green-600 text-white py-2 rounded-lg"
             onClick={startCamera}
+            disabled={!modelsLoaded}
           >
-            Scan Face
+            {modelsLoaded ? "Scan Face" : "Loading Model..."}
           </button>
         )}
 
         {/* Camera Preview */}
         {isCameraOpen && (
-          <div className="space-y-2">
+          <div className="relative">
             <video
               ref={videoRef}
               autoPlay
               className="w-full h-60 border border-gray-600 rounded-lg"
             />
+            <canvas
+              ref={canvasRef}
+              className="absolute top-0 left-0 w-full h-full pointer-events-none"
+            />
             <button
-              className="w-full bg-red-600 text-white py-2 rounded-lg"
+              className="w-full bg-red-600 text-white py-2 rounded-lg mt-2 relative z-10"
               onClick={captureImage}
             >
               Capture Image
             </button>
           </div>
         )}
-
-        {/* Display Captured Image */}
-        {faceCaptured && imageData && (
-          <div className="space-y-2">
-            <p className="text-center text-gray-400">Face Captured:</p>
+        {imageData && (
+          <div className="text-center mt-4">
+            <p className="text-gray-400">Captured Face:</p>
             <img
               src={imageData}
               alt="Captured Face"
@@ -211,17 +305,6 @@ export default function SignupPage() {
         >
           Sign Up
         </button>
-
-        {/* Login Link */}
-        <p
-          className="text-center text-sm text-gray-400 cursor-pointer hover:text-blue-500"
-          onClick={() => router.push("./login")}
-        >
-          Already have an account? Login
-        </p>
-
-        {/* Hidden Canvas for Capturing Image */}
-        <canvas ref={canvasRef} className="hidden" />
       </div>
     </div>
   );
