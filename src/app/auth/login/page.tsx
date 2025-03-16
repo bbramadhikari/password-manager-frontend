@@ -14,22 +14,41 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   // Handle Login
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       toast.error("Email and Password are required!");
       return;
     }
+
     setLoading(true);
-    setTimeout(() => {
-      if (email === "example@example.com" && password === "password123") {
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/users/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      console.log("📥 API Response:", data);
+
+      if (response.ok) {
+        // Store JWT tokens
+        localStorage.setItem("access_token", data.token);
+        localStorage.setItem("refresh_token", data.refresh);
+
         setIsAuthenticated(true);
         toast.success("Logged in successfully!");
         router.push("../dashboard");
       } else {
-        toast.error("Invalid credentials");
+        toast.error(data.error || "Invalid credentials");
       }
-      setLoading(false);
-    }, 1500);
+    } catch (error) {
+      console.error("⚠️ API Error:", error);
+      toast.error("⚠️ Error connecting to the server.");
+    }
+
+    setLoading(false);
   };
 
   return (

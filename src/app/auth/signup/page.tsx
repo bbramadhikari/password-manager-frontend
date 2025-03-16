@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [faceCaptured, setFaceCaptured] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
 
   // Camera states
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -32,7 +33,6 @@ export default function SignupPage() {
         videoRef.current.srcObject = stream;
       }
     } catch (error) {
-      console.error("Error accessing the camera: ", error);
       alert("Failed to access the camera.");
     }
   };
@@ -41,30 +41,24 @@ export default function SignupPage() {
   const captureImage = () => {
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext("2d");
-      canvasRef.current.width = videoRef.current.videoWidth;
-      canvasRef.current.height = videoRef.current.videoHeight;
+      canvasRef.current.width = 300; // Resize for performance
+      canvasRef.current.height = 300;
       if (context) {
-        context.drawImage(
-          videoRef.current,
-          0,
-          0,
-          canvasRef.current.width,
-          canvasRef.current.height
-        );
-        const imageDataUrl = canvasRef.current.toDataURL("image/png");
-        setImageData(imageDataUrl); // Store image data
+        context.drawImage(videoRef.current, 0, 0, 300, 300);
+        const imageDataUrl = canvasRef.current.toDataURL("image/png", 0.8); // Compress
+        setImageData(imageDataUrl);
         setFaceCaptured(true);
         setIsCameraOpen(false);
+
         // Stop the camera
         const stream = videoRef.current.srcObject as MediaStream;
-        const tracks = stream.getTracks();
-        tracks.forEach((track) => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       }
     }
   };
 
-  // Handle Signup
-  const handleSignup = () => {
+  // Handle Signup API Call
+  const handleSignup = async () => {
     if (name.length < 8) {
       alert("Name must be at least 8 characters long.");
       return;
@@ -81,22 +75,49 @@ export default function SignupPage() {
       alert("Please enter your phone number.");
       return;
     }
-    if (!faceCaptured) {
+    if (!faceCaptured || !imageData) {
       alert("Please scan your face before signing up.");
       return;
     }
 
-    // Simulate sending data to the backend
-    console.log({
-      name,
-      phone,
-      email,
-      password,
-      faceImage: imageData,
+    console.log("📤 Sending Signup Data:", {
+      username: name,
+      phone: phone,
+      email: email,
+      password: password,
+      face_image: imageData,
     });
 
-    alert("Signup successful! (Face image captured)");
-    router.push("./login");
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/users/signup/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: name,
+          phone: phone,
+          email: email,
+          password: password,
+          face_image: imageData, // Sending Base64 image
+        }),
+      });
+
+      const data = await response.json();
+      console.log("📥 API Response:", data);
+
+      if (response.ok) {
+        alert("✅ Signup successful! Redirecting to login...");
+        console.log("✅ Redirecting to /login...");
+
+        setTimeout(() => {
+          router.push("./login"); // ✅ Navigate to login after 2 seconds
+        }, 2000);
+      } else {
+        alert(`❌ Signup failed: ${data.error || "Try again."}`);
+      }
+    } catch (error) {
+      console.error("⚠️ API Error:", error);
+      alert("⚠️ Error connecting to the server.");
+    }
   };
 
   return (
@@ -110,7 +131,7 @@ export default function SignupPage() {
           placeholder="Full Name (min 8 characters)"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white"
           required
         />
 
@@ -120,7 +141,7 @@ export default function SignupPage() {
           placeholder="Phone Number"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white"
           required
         />
 
@@ -130,7 +151,7 @@ export default function SignupPage() {
           placeholder="Email Address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white"
           required
         />
 
@@ -140,14 +161,14 @@ export default function SignupPage() {
           placeholder="Password (min 8 characters)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+          className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 text-white"
           required
         />
 
         {/* Face Scan Section */}
         {!faceCaptured && (
           <button
-            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-300"
+            className="w-full bg-green-600 text-white py-2 rounded-lg"
             onClick={startCamera}
           >
             Scan Face
@@ -163,7 +184,7 @@ export default function SignupPage() {
               className="w-full h-60 border border-gray-600 rounded-lg"
             />
             <button
-              className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition duration-300"
+              className="w-full bg-red-600 text-white py-2 rounded-lg"
               onClick={captureImage}
             >
               Capture Image
@@ -185,7 +206,7 @@ export default function SignupPage() {
 
         {/* Sign Up Button */}
         <button
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+          className="w-full bg-blue-600 text-white py-2 rounded-lg"
           onClick={handleSignup}
         >
           Sign Up
@@ -193,7 +214,7 @@ export default function SignupPage() {
 
         {/* Login Link */}
         <p
-          className="text-center text-sm text-gray-400 cursor-pointer hover:text-blue-500 transition duration-300"
+          className="text-center text-sm text-gray-400 cursor-pointer hover:text-blue-500"
           onClick={() => router.push("./login")}
         >
           Already have an account? Login
