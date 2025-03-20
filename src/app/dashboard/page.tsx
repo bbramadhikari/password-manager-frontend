@@ -14,6 +14,8 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem("access_token");
+      const refreshToken = localStorage.getItem("refresh_token");
+
       if (!token) {
         setUsername("Guest");
         console.error("❌ No access token found in localStorage");
@@ -37,12 +39,53 @@ export default function DashboardPage() {
           const data = await response.json();
           console.log("✅ Fetched User Data:", data); // ✅ Log User Data
           setUsername(data.username); // Set the fetched username
+        } else if (response.status === 401 && refreshToken) {
+          // If token is expired (status 401), try refreshing the token
+          console.log("❌ Token expired, attempting to refresh...");
+
+          const refreshResponse = await fetch(
+            "http://127.0.0.1:8000/api/token/refresh/",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ refresh: refreshToken }),
+            }
+          );
+
+          if (refreshResponse.ok) {
+            const { access, refresh } = await refreshResponse.json();
+            localStorage.setItem("access_token", access); // Store the new access token
+            localStorage.setItem("refresh_token", refresh); // Optionally store the new refresh token
+
+            // Retry fetching user data with the new access token
+            const retryResponse = await fetch(
+              "http://127.0.0.1:8000/api/users/me/",
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${access}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            if (retryResponse.ok) {
+              const data = await retryResponse.json();
+              setUsername(data.username); // Set the fetched username
+            } else {
+              setUsername("Guest");
+            }
+          } else {
+            setUsername("Guest");
+            console.error(
+              "❌ Failed to refresh token:",
+              await refreshResponse.text()
+            );
+          }
         } else {
           setUsername("Guest");
-          console.error(
-            "❌ Failed to fetch user details:",
-            await response.text()
-          );
         }
       } catch (error) {
         setUsername("Guest");
