@@ -311,7 +311,7 @@ export default function ShowPasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md space-y-6">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full space-y-6">
         <h2 className="text-3xl font-bold text-center">Show Passwords</h2>
 
         {/* Face ID Verification */}
