@@ -12,10 +12,10 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // ✅ Load Face Detection Models Before Using
+  //Load Face Detection Models Before Using
   useEffect(() => {}, []);
 
-  // ✅ Handle Signup API Call
+  //Handle Signup API Call
   const handleSignup = async () => {
     if (!name || !phone || !email || !password) {
       alert("All fields are required");

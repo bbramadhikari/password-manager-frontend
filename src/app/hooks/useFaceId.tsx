@@ -14,14 +14,14 @@ function useFaceId() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // ✅ Load Face Detection Models Before Using
+  // Load Face Detection Models Before Using
   useEffect(() => {
     const loadModels = async () => {
       try {
         console.log("⏳ Loading face detection models...");
         await faceapi.nets.tinyFaceDetector.loadFromUri("/models"); // Ensure this path is correct!
         setModelsLoaded(true);
-        console.log("✅ Face detection model loaded!");
+        console.log("Face detection model loaded!");
       } catch (error) {
         console.error("⚠️ Error loading face detection model:", error);
       }
@@ -29,7 +29,7 @@ function useFaceId() {
     loadModels();
   }, []);
 
-  // ✅ Start Camera
+  // Start Camera
   const startCamera = async () => {
     if (!modelsLoaded) {
       alert("Face detection model is still loading. Please wait...");
@@ -49,7 +49,7 @@ function useFaceId() {
     }
   };
 
-  // ✅ Detect Face in Real-Time with Bounding Box
+  // Detect Face in Real-Time with Bounding Box
 
   const detectFace = async () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -58,7 +58,7 @@ function useFaceId() {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
 
-    // ✅ Ensure video is loaded
+    // Ensure video is loaded
     if (video.videoWidth === 0 || video.videoHeight === 0) {
       console.warn("⏳ Waiting for video to load...");
       return;
@@ -71,9 +71,9 @@ function useFaceId() {
 
     if (detections) {
       setFaceDetected(true);
-      console.log("✅ Face detected!");
+      console.log("Face detected!");
 
-      // ✅ Draw bounding box around face
+      // Draw bounding box around face
       if (context) {
         context.clearRect(0, 0, canvas.width, canvas.height);
         const { x, y, width, height } = detections.box;
@@ -81,7 +81,7 @@ function useFaceId() {
         context.lineWidth = 2;
         context.strokeRect(x, y, width, height);
 
-        // ✅ Add label "Face Confirmed"
+        // Add label "Face Confirmed"
         context.fillStyle = "blue";
         context.fillRect(x, y - 20, width, 20);
         context.fillStyle = "white";
@@ -104,7 +104,7 @@ function useFaceId() {
 
     if (!context) return;
 
-    // ✅ Detect face before capturing
+    // Detect face before capturing
     const detections = await faceapi.detectSingleFace(
       video,
       new faceapi.TinyFaceDetectorOptions()
@@ -115,11 +115,11 @@ function useFaceId() {
       return;
     }
 
-    console.log("✅ Face detected! Attempting to capture...");
+    console.log("Face detected! Attempting to capture...");
 
     const { x, y, width, height } = detections.box; // Face bounding box
 
-    // ✅ Crop only the detected face
+    // Crop only the detected face
     const faceCanvas = document.createElement("canvas");
     faceCanvas.width = width;
     faceCanvas.height = height;
@@ -142,16 +142,16 @@ function useFaceId() {
       setImageData(faceImageDataUrl);
       setFaceCaptured(true);
 
-      console.log("✅ Image Captured!");
+      console.log("Image Captured!");
 
-      // ✅ Stop the camera **after** capturing
+      // Stop the camera **after** capturing
       setIsCameraOpen(false);
       const stream = video.srcObject as MediaStream;
       stream.getTracks().forEach((track) => track.stop());
     }
   };
 
-  // ✅ Keep face detection running while camera is open
+  // Keep face detection running while camera is open
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isCameraOpen) {

@@ -12,7 +12,7 @@ export default function RootLayout({
       <body className="bg-slate-600 text-white">
         <AuthProvider>
           {children}
-          {/* Add Toaster component here for global toast notifications */}
+          {/* Add Toaster component for global toast notifications */}
           <Toaster position="top-right" reverseOrder={false} />
         </AuthProvider>
       </body>

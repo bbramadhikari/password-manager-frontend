@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isOTPVerified,
         setIsOTPVerified,
         isAuthenticated,
-        setIsAuthenticated, // Add this line
+        setIsAuthenticated,
       }}
     >
       {children}

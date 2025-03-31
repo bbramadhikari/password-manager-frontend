@@ -1,7 +1,4 @@
 "use client";
-
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
 import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import * as faceapi from "face-api.js";
@@ -14,19 +11,14 @@ interface PasswordEntry {
 
 export default function ShowPasswordPage() {
   const token = localStorage.getItem("access_token");
-
-  const { setIsFaceVerified, isOTPVerified, setIsOTPVerified } = useAuth();
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [isVerified, setIsVerified] = useState(false); // For face verification status
-  const [faceDetected, setFaceDetected] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
   const [faceIdVerified, setFaceIdVerified] = useState<boolean>(false);
-  const router = useRouter();
-  const { setIsAuthenticated } = useAuth();
   const [faceCaptured, setFaceCaptured] = useState(false);
 
   // Camera references
@@ -51,9 +43,9 @@ export default function ShowPasswordPage() {
           "https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/"
         );
         setModelsLoaded(true);
-        console.log("✅ Face detection models loaded!");
+        console.log("Face detection models loaded!");
       } catch (error) {
-        console.error("⚠️ Error loading face detection model:", error);
+        console.error("Error loading face detection model:", error);
       }
     };
     loadModels();
@@ -84,7 +76,6 @@ export default function ShowPasswordPage() {
     }
 
     setIsCameraOpen(true);
-    setFaceDetected(false);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (videoRef.current) {
@@ -115,7 +106,6 @@ export default function ShowPasswordPage() {
     );
 
     if (detections) {
-      setFaceDetected(true);
       console.log("✅ Face detected!");
 
       if (context) {
@@ -131,7 +121,6 @@ export default function ShowPasswordPage() {
         context.fillText("Face Confirmed", x + 5, y - 5);
       }
     } else {
-      setFaceDetected(false);
     }
   };
 
@@ -139,7 +128,6 @@ export default function ShowPasswordPage() {
   const captureImage = async () => {
     if (!videoRef.current || !canvasRef.current) return;
 
-    setFaceDetected(false);
     const video = videoRef.current;
     const context = canvasRef.current.getContext("2d");
     if (!context) return;
@@ -259,7 +247,6 @@ export default function ShowPasswordPage() {
       const data = await response.json();
       if (response.ok) {
         setPasswords(data); // Set the passwords if OTP is verified successfully
-        setIsOTPVerified(true);
         setIsVerified(true);
         toast.success("Passwords fetched successfully!");
       } else {
@@ -304,22 +291,17 @@ export default function ShowPasswordPage() {
     }
   };
 
-  // Show passwords after face verification
-  const handleShowPasswords = () => {
-    setIsVerified(true);
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full space-y-6">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-4xl flex flex-col items-center justify-center space-y-6 min-h-[400px]">
         <h2 className="text-3xl font-bold text-center">Show Passwords</h2>
 
         {/* Face ID Verification */}
 
-        <div className="space-y-4">
+        <div className="space-y-4 w-full flex flex-col items-center">
           {!faceIdVerified && (
             <button
-              className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+              className="mx-auto w-42 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
               onClick={startCamera}
               disabled={!modelsLoaded}
             >
@@ -327,7 +309,7 @@ export default function ShowPasswordPage() {
             </button>
           )}
           {!faceIdVerified && isCameraOpen && (
-            <div className="relative">
+            <div className="relative w-full flex flex-col items-center">
               <video
                 ref={videoRef}
                 autoPlay
@@ -338,7 +320,7 @@ export default function ShowPasswordPage() {
                 className="absolute top-0 left-0 w-full h-full pointer-events-none"
               />
               <button
-                className="w-full bg-red-600 text-white py-2 rounded-lg mt-2 relative z-10"
+                className="w-32 bg-red-600 text-white py-2 rounded-lg mt-2 mx-auto"
                 onClick={captureImage}
               >
                 Capture Image
@@ -356,37 +338,27 @@ export default function ShowPasswordPage() {
               className="w-32 h-32 mx-auto border border-gray-600 rounded-lg"
             />
             <button
-              className="w-full bg-blue-600 text-white py-2 rounded-lg mt-2"
+              className="w-32 bg-blue-600 text-white py-2 rounded-lg mt-2 mx-auto"
               onClick={uploadFaceId}
             >
-              Upload Face Id
+              Scan Face Id
             </button>
           </div>
         )}
-        {/* {isVerified && (
-          <div className="mt-6">
-            <button
-              onClick={handleShowPasswords}
-              className="w-full px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
-            >
-              Show Passwords
-            </button>
-          </div>
-        )} */}
 
         {/* OTP Verify */}
         {faceIdVerified && (
-          <div className="space-y-4">
+          <div className="space-y-4 w-full flex flex-col items-center">
             {!otpSent ? (
               <button
                 onClick={handleSendOTP}
-                className="w-full px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
+                className="mx-auto w-32 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
               >
                 Send OTP
               </button>
             ) : (
               !isVerified && (
-                <div className="mt-4">
+                <div className="space-y-4 w-full flex flex-col items-center">
                   <input
                     type="text"
                     placeholder="Enter OTP"
@@ -396,7 +368,7 @@ export default function ShowPasswordPage() {
                   />
                   <button
                     onClick={handleOTPSubmit}
-                    className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 mt-2"
+                    className="mx-auto w-42 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
                   >
                     Submit OTP
                   </button>
@@ -408,21 +380,29 @@ export default function ShowPasswordPage() {
 
         {/* Display passwords if OTP and face verification are done */}
         {isVerified && (
-          <div className="mt-6">
-            <table className="w-full bg-gray-800 text-white rounded-lg overflow-hidden">
-              <thead>
-                <tr className="bg-gray-900">
-                  <th className="py-2 px-4 text-left">Domain</th>
-                  <th className="py-2 px-4 text-left">Link</th>
-                  <th className="py-2 px-4 text-left">Password</th>
+          <div className="mt-6 w-full overflow-x-auto">
+            <table className="table-auto border-collapse w-full bg-gray-800 rounded-lg shadow">
+              <thead className="bg-gray-900 text-white">
+                <tr>
+                  <th className="px-4 py-2 border-b border-gray-700">Domain</th>
+                  <th className="px-4 py-2 border-b border-gray-700">Link</th>
+                  <th className="px-4 py-2 border-b border-gray-700">
+                    Password
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {passwords.map((entry, index) => (
-                  <tr key={index} className="border-t border-gray-700">
-                    <td className="py-2 px-4">{entry.domain_name}</td>
-                    <td className="py-2 px-4">{entry.link}</td>
-                    <td className="py-2 px-4">{entry.password}</td>
+                  <tr key={index} className="hover:bg-gray-700">
+                    <td className="px-4 py-2 border-b border-gray-700 text-gray-200">
+                      {entry.domain_name}
+                    </td>
+                    <td className="px-4 py-2 border-b border-gray-700 text-gray-200 break-words">
+                      {entry.link}
+                    </td>
+                    <td className="px-4 py-2 border-b border-gray-700 text-gray-200 break-words">
+                      {entry.password}
+                    </td>
                   </tr>
                 ))}
               </tbody>
