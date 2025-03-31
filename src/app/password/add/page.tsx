@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
-export default function AddPasswordPage() {
+const AddPasswordForm = () => {
   const router = useRouter();
+
   const [domainName, setDomainName] = useState("");
   const [password, setPassword] = useState("");
   const [link, setLink] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Toggle state for password visibility
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,25 +24,31 @@ export default function AddPasswordPage() {
       return;
     }
 
-    // Make a POST request to add the password
-    const response = await fetch("http://127.0.0.1:8000/api/users/passwords/", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        domain_name: domainName,
-        password: password,
-        link: link,
-      }),
-    });
+    const response = await fetch(
+      "http://127.0.0.1:8000/api/users/add_password/",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          domain_name: domainName,
+          password: password,
+          link: link,
+        }),
+      }
+    );
 
     setLoading(false);
 
     if (response.ok) {
       toast.success("Password added successfully!");
-      // Reset the form fields after successful submission
+
+      // Redirect to the dashboard after successful password addition
+      router.push("/dashboard");
+
+      // Reset the form fields
       setDomainName("");
       setPassword("");
       setLink("");
@@ -74,14 +82,23 @@ export default function AddPasswordPage() {
             <label htmlFor="password" className="block text-sm font-medium">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 p-2 w-full bg-gray-700 rounded-md text-white"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"} // Toggle between text and password input type
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 p-2 w-full bg-gray-700 rounded-md text-white"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                className="absolute right-3 top-3 text-gray-400"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
           <div>
@@ -108,4 +125,6 @@ export default function AddPasswordPage() {
       </div>
     </div>
   );
-}
+};
+
+export default AddPasswordForm;
